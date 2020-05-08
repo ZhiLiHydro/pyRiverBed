@@ -1,7 +1,7 @@
 # pyRiverBed
 Generate Synthetic Riverbed Topography for Meandering Rivers
 
-![intro](https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/pyRiverBed_intro.png)
+![intro](https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/pyRiverBed_intro.png)
 
 ## Introduction
 
@@ -37,7 +37,7 @@ This tool could:
 
 * Uses a tkinter-based graphical user interface (GUI) as front end
 
-<img src="https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/pyRiverBed_gui1.gif">
+<img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/pyRiverBed_gui1.gif">
 
 ## Prerequisites
 
@@ -84,13 +84,13 @@ Task: Reproduce the flume studied in [this paper](https://agupubs.onlinelibrary.
 
 The default parameters in GUI are pre-typed for this case, so nothing needs to be changed. Click `Generate steering file` button, then click `Run pyRiverBed` button to run and check the results. 
 
-![intro](https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/pyRiverBed_eg1.png)
+![intro](https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/pyRiverBed_eg1.png)
 
 #### Modeling meander migration
 
 Synthetic riverbed | River centerline
 :-------------------------:|:-------------------------:
-<img src="https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/kinoshita_migration0.gif">  |  <img src="https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/kinoshita_migration1.gif">
+<img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/kinoshita_migration0.gif">  |  <img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/kinoshita_migration1.gif">
 
 ### Mode 2: Read your own river centerline from file
 
@@ -98,13 +98,13 @@ Task: Read centerline coordinates from file.
 
 The river centerline of a randomly picked reach (at 7°32'09.9"S 72°31'16.0"W) of a randomly picked river (it's Juruá River in Brazil) is discretized manually (well, a fancy centerline extraction tool is recommended here for real cases) on a georeferenced TIFF map. The river centerline coordinates is saved to `jurua.txt`. Open the GUI to type in the followings: mode = 2, file name = 'jurua.txt', width = 160 m (estimated), depth = 8 m (arbitrary), slope = 0 (arbitrary), lag strength = 6 (estimated), flip in transverse direction = no. Keep the defaults for other parameters. Click `Generate steering file` button, then click `Run pyRiverBed` button in GUI to run and see the results.
 
-![intro](https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/pyRiverBed_eg2.png)
+![intro](https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/pyRiverBed_eg2.png)
 
 #### Modeling meander migration
 
 Synthetic riverbed | River centerline
 :-------------------------:|:-------------------------:
-<img src="https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/jurua_migration0.gif">  |  <img src="https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/img/jurua_migration1.gif">
+<img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/jurua_migration0.gif">  |  <img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/jurua_migration1.gif">
 
 ## To do
 
@@ -116,4 +116,4 @@ Li, Z. and Garcia, M. H. (2020). pyRiverBed: A Python framework to generate synt
 
 ## License
 
-[MIT License](https://github.com/ZhiLiHydro/pyRiverBed_dev/blob/master/LICENSE)
+[MIT License](https://github.com/ZhiLiHydro/pyRiverBed/blob/master/LICENSE)
