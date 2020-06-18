@@ -8,7 +8,6 @@ Contact: zhil2[at]illinois[dot]edu
 
 """
 
-from __future__ import division, print_function
 import sys
 import os
 import shutil
@@ -22,7 +21,7 @@ import plotdemo as mf
 
 def print_banner():
     """
-    Print the banner of pyRiverBed.
+    Print the banner.
     
     Parameters
     ----------
@@ -639,7 +638,7 @@ def lag(s, cur, t):
         elif MODE == 2:
             num = np.int(WIDTH*LAGSTR/np.mean(np.diff(s)))
     if np.mod(t, LPRINT) == 0:
-        print('+> Adding phase lag to curvature...', end='')
+        print('+> Adding phase lag to local curvature...', end='')
     cur = compute_lag(cur, num)
     if np.mod(t, LPRINT) == 0:
         print(' [done]')

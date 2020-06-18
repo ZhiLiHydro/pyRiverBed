@@ -8,7 +8,6 @@ Contact: zhil2[at]illinois[dot]edu
 
 """
 
-from __future__ import division, print_function
 import os
 import sys
 import numpy as np
@@ -80,7 +79,7 @@ def make_figure(x, y, allxyz, cur_ori, cur_flt, cur_lag, s, beck_bed,
             plt.plot(oxbowx, oxbowy, color='peru', linewidth=3, label='_nolegend_', zorder=0)
     else:
         plt.title('(a) Synthetic bed in x-y coordinate\n(exposed sand bar visualization)', fontsize=16)
-    waterlevel = DEPTH/3
+    waterlevel = DEPTH/2
     argwet = np.argwhere(allxyz[:, 2]-np.tile((s[-1]-s)*SLOPE, NUM*2+1)<waterlevel)
     argdry = np.argwhere(allxyz[:, 2]-np.tile((s[-1]-s)*SLOPE, NUM*2+1)>=waterlevel)
     wetcolor, drycolor, bgcolor = (70/256,80/256,60/256), (200/256,187/256,160/256), (99/256,120/256,84/256)

@@ -402,7 +402,7 @@ def main():
         anchor='w').pack(side='left')
 
     canvas = tk.Canvas(root)
-    if root.winfo_screenheight() < 1000:
+    if root.winfo_screenheight() < 1051:
         canvas.pack(side='left', padx=20)
     else:
         canvas.pack(side='top', padx=20)
@@ -966,7 +966,7 @@ def main():
     row.pack(side='top')
  
     def open_github(): 
-        webbrowser.open('https://github.com/ZhiLiHydro')
+        webbrowser.open('https://github.com/ZhiLiHydro/pyRiverBed')
 
     tk.Label(
         row,
