@@ -878,6 +878,8 @@ def offset(x, y, L):
     Compute left and right offset polylines of centerline 
     with an offset distance of L.
     
+    Thank Y. Luo for improving the offsetting method.
+    
     Parameters
     ----------
     x : ndarray
@@ -896,77 +898,62 @@ def offset(x, y, L):
 
     """
     length = x.size
-    Cx = np.zeros(length)
-    Cy = np.zeros(length)
-    avek = np.zeros(length)
-    theta = np.zeros(length)
-    R = np.zeros(length)
     offsetx = np.zeros((length, 2))
     offsety = np.zeros((length, 2))
+    dx = np.zeros(length-1)
+    dy = np.zeros(length-1)
+    dxL = np.zeros(length-1)
+    dyL = np.zeros(length-1)
+    xl = np.zeros(length) # counterclockwise
+    xr = np.zeros(length) # clockwise
+    yl = np.zeros(length)
+    yr = np.zeros(length)
+    xl0 = np.zeros(length)
+    xr0 = np.zeros(length)
+    yl0 = np.zeros(length)
+    yr0 = np.zeros(length)   
+    for i in range(0, length-1):
+        dx[i] = x[i+1]-x[i]
+        dy[i] = y[i+1]-y[i]
+    for i in range(0, length-1):
+        r = np.sqrt(dx[i]**2 + dy[i]**2)
+        dxL[i] = dx[i]*L/r
+        dyL[i] = dy[i]*L/r
+        xl0[i] = -dyL[i] + x[i]
+        yl0[i] = dxL[i] + y[i]
+        xr0[i] = dyL[i] + x[i]
+        yr0[i] = -dxL[i] + y[i]
+    xl0[length-1] = xl0[length-2] + dx[length-2]
+    yl0[length-1] = yl0[length-2] + dy[length-2]
+    xr0[length-1] = xr0[length-2] + dx[length-2]
+    yr0[length-1] = yr0[length-2] + dy[length-2]
+    xl[0] = xl0[0]
+    yl[0] = yl0[0]
+    xl[length-1] = xl0[length-1]
+    yl[length-1] = yl0[length-1]
+    xr[0] = xr0[0]
+    yr[0] = yr0[0]
+    xr[length-1] = xr0[length-1]
+    yr[length-1] = yr0[length-1]
     for i in range(1, length-1):
-        a = np.sqrt((x[i+1]-x[i])**2 + (y[i+1]-y[i])**2)
-        b = np.sqrt((x[i+1]-x[i-1])**2 + (y[i+1]-y[i-1])**2)
-        c = np.sqrt((x[i]-x[i-1])**2 + (y[i]-y[i-1])**2)
-        p = a + b + c
-        area = 0.5*np.abs((x[i-1]*y[i] - x[i]*y[i-1] + x[i]*y[i+1]
-            - x[i+1]*y[i] + x[i+1]*y[i-1] - x[i-1]*y[i+1]))
-        Cx[i] = (x[i-1]*a + x[i]*b + x[i+1]*c)/p
-        Cy[i] = (y[i-1]*a + y[i]*b + y[i+1]*c)/p
-        if area/WIDTH**2 < ZERO and np.abs(y[i] - y[i-1]) < ZERO:
-            avek[i] = 1/ZERO
-        elif area/WIDTH**2 < ZERO and np.abs(x[i] - x[i-1]) < ZERO:
-            avek[i] = 0
-        elif area/WIDTH**2 < ZERO:
-            avek[i] = -(x[i] - x[i-1])/(y[i] - y[i-1])
-        elif np.abs(x[i] - Cx[i]) < ZERO:
-            avek[i] = 1/ZERO
-        elif np.abs(y[i] - Cy[i]) < ZERO:
-            avek[i] = 0
+        a = np.array([[dy[i-1], -dx[i-1]], [dy[i], -dx[i]]])
+        bl = np.array([dy[i-1]*xl0[i-1]-dx[i-1]*yl0[i-1], dy[i]*xl0[i]-dx[i]*yl0[i]])
+        br = np.array([dy[i-1]*xr0[i-1]-dx[i-1]*yr0[i-1], dy[i]*xr0[i]-dx[i]*yr0[i]])
+        theta = (dx[i-1]*dx[i]+dy[i-1]*dy[i])/(dx[i-1]**2+dy[i-1]**2)**0.5/(dx[i]**2+dy[i]**2)**0.5
+        if theta > 1 - 1e-10:
+            xl[i] = xl0[i]
+            yl[i] = yl0[i]
+            xr[i] = xr0[i]
+            yr[i] = yr0[i]
         else:
-            avek[i] = (y[i] - Cy[i])/(x[i] - Cx[i])
-        m = np.array([x[i+1] - x[i], y[i+1] - y[i]])
-        n = np.array([x[i-1] - x[i], y[i-1] - y[i]])
-        if np.abs(np.vdot(m, n)/np.linalg.norm(m)/np.linalg.norm(n)+1) < ZERO:
-            theta[i] = np.pi
-        elif np.abs(np.vdot(m, n)/np.linalg.norm(m)/np.linalg.norm(n)-1) < ZERO:
-            theta[i] = 0
-        elif np.abs(np.vdot(m, n)/np.linalg.norm(m)/np.linalg.norm(n)) < ZERO:
-            theta[i] = np.pi/2
-        else:
-            theta[i] = np.arccos(np.vdot(m, n)/np.linalg.norm(m)/np.linalg.norm(n))
-        R[i] = L/np.sin(theta[i]/2)
-        if np.isnan(R[i]) or np.isinf(R[i]):
-            R[i] = L
-        if np.abs(avek[i]) < ZERO:
-            offsetx[i, 0] = x[i] + R[i]
-            offsetx[i, 1] = x[i] - R[i]
-            offsety[i, 0] = y[i]
-            offsety[i, 1] = y[i]
-        elif np.isinf(np.abs(avek[i])) or np.abs(avek[i]) > 1/ZERO:
-            offsetx[i, 0] = x[i]
-            offsetx[i, 1] = x[i]
-            offsety[i, 0] = y[i] + R[i]
-            offsety[i, 1] = y[i] - R[i]
-        else:
-            offsetx[i, 0] = R[i]/np.sqrt(avek[i]**2 + 1) + x[i]
-            offsetx[i, 1] = -R[i]/np.sqrt(avek[i]**2 + 1) + x[i]
-            offsety[i, 0] = avek[i]*(offsetx[i, 0] - x[i]) + y[i]
-            offsety[i, 1] = avek[i]*(offsetx[i, 1] - x[i]) + y[i]
-        if np.sqrt((offsetx[i, 0]-offsetx[i-1, 0])**2+(offsety[i, 0]-offsety[i-1, 0])**2) > R[i]*2:
-            offsetx[i, 0], offsetx[i, 1] = offsetx[i, 1], offsetx[i, 0]
-            offsety[i, 0], offsety[i, 1] = offsety[i, 1], offsety[i, 0]
-    coshead = (x[1] - x[0])/np.sqrt((x[1]-x[0])**2+(y[1]-y[0])**2)
-    sinhead = (y[1] - y[0])/np.sqrt((x[1]-x[0])**2+(y[1]-y[0])**2)
-    costail = (x[-1] - x[-2])/np.sqrt((x[-1]-x[-2])**2+(y[-1]-y[-2])**2)
-    sintail = (y[-1] - y[-2])/np.sqrt((x[-1]-x[-2])**2+(y[-1]-y[-2])**2)
-    offsetx[0, 0] = offsetx[1, 0] - np.sqrt((x[1]-x[0])**2+(y[1]-y[0])**2)*coshead
-    offsetx[0, 1] = offsetx[1, 1] - np.sqrt((x[1]-x[0])**2+(y[1]-y[0])**2)*coshead
-    offsety[0, 0] = offsety[1, 0] - np.sqrt((x[1]-x[0])**2+(y[1]-y[0])**2)*sinhead
-    offsety[0, 1] = offsety[1, 1] - np.sqrt((x[1]-x[0])**2+(y[1]-y[0])**2)*sinhead
-    offsetx[-1, 0] = offsetx[-2, 0] + np.sqrt((x[-1]-x[-2])**2+(y[-1]-y[-2])**2)*costail
-    offsetx[-1, 1] = offsetx[-2, 1] + np.sqrt((x[-1]-x[-2])**2+(y[-1]-y[-2])**2)*costail
-    offsety[-1, 0] = offsety[-2, 0] + np.sqrt((x[-1]-x[-2])**2+(y[-1]-y[-2])**2)*sintail
-    offsety[-1, 1] = offsety[-2, 1] + np.sqrt((x[-1]-x[-2])**2+(y[-1]-y[-2])**2)*sintail
+            pl = np.linalg.solve(a, bl)
+            xl[i] = pl[0]
+            yl[i] = pl[1]
+            pr = np.linalg.solve(a, br)
+            xr[i] = pr[0]
+            yr[i] = pr[1]
+    offsetx[:, 0], offsetx[:, 1] = xl, xr
+    offsety[:, 0], offsety[:, 1] = yl, yr
     return offsetx, offsety
 
 
