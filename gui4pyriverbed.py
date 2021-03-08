@@ -137,7 +137,7 @@ def main():
                      tickinterval=25,
                      length=w2,
                      variable=smoothvar)
-    scale.set(10)
+    scale.set(20)
     scale.pack()
 
     if platform.system() == 'Darwin':
@@ -366,7 +366,7 @@ def main():
     
     tk.Label(
         row,
-        text='(Grid size of centerline, ONLY WORK IF MODE=1)',
+        text='(Grid size of centerline)',
         width=55,
         font='System 10',
         anchor='w').pack(side='left')
