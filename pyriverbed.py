@@ -84,39 +84,39 @@ def read_steering():
     FLIPTRANS, MIGRATION, UB0, C0, CF0, FR0, DT, E0, LPRINT, TSTEPS, \
     GPRINT, FPS, ZERO, JPG_DIRS, FNAME, SMOLEV, STCORR
     
-    MODE = np.int(d[0])
-    NBENDS = np.int(d[1])
-    LAMBDA = np.float(d[2])
-    THETA0 = np.float(d[3])*np.pi/180
-    JS = np.float(d[4])
-    JF = np.float(d[5])
-    WIDTH = np.float(d[6])
-    DEPTH = np.float(d[7])
-    SLOPE = np.float(d[8])
-    DS = np.float(d[9])
-    NUM = np.int(d[10])
+    MODE = int(d[0])
+    NBENDS = int(d[1])
+    LAMBDA = float(d[2])
+    THETA0 = float(d[3])*np.pi/180
+    JS = float(d[4])
+    JF = float(d[5])
+    WIDTH = float(d[6])
+    DEPTH = float(d[7])
+    SLOPE = float(d[8])
+    DS = float(d[9])
+    NUM = int(d[10])
     INTERVAL = WIDTH/2/NUM
-    LAG = np.int(d[11])
+    LAG = int(d[11])
     LAGSTR = d[12]
-    SAVEXYZ = np.int(d[13])
-    SAVEBOUND = np.int(d[14])
-    SAVEMESH = np.int(d[15])
-    FLIPSTRM = np.int(d[16])
-    FLIPTRANS = np.int(d[17])
-    MIGRATION = np.int(d[18])
-    UB0 = np.float(d[19])
-    C0 = np.float(d[20])
-    CF0 = np.float(d[21])
-    FR0 = np.float(d[22])
-    DT = np.int(d[23])
-    E0 = np.float(d[24])
-    LPRINT = np.int(d[25])
-    TSTEPS = np.int(d[26])
+    SAVEXYZ = int(d[13])
+    SAVEBOUND = int(d[14])
+    SAVEMESH = int(d[15])
+    FLIPSTRM = int(d[16])
+    FLIPTRANS = int(d[17])
+    MIGRATION = int(d[18])
+    UB0 = float(d[19])
+    C0 = float(d[20])
+    CF0 = float(d[21])
+    FR0 = float(d[22])
+    DT = int(d[23])
+    E0 = float(d[24])
+    LPRINT = int(d[25])
+    TSTEPS = int(d[26])
     if MIGRATION == 0:
         TSTEPS = 0
-    GPRINT = np.int(d[27])
-    FPS = np.int(d[28])
-    SMOLEV = np.int(d[29])
+    GPRINT = int(d[27])
+    FPS = int(d[28])
+    SMOLEV = int(d[29])
     STCORR = d[30]
     ZERO = 1e-8
     JPG_DIRS = ['./jpg1/', './jpg2/']
@@ -159,7 +159,7 @@ def print_para_table(s):
              ['Slope', SLOPE, '/'],
              ['Streamwise resolution', DS, 'm'],
              ['Transverse resolution', np.around(INTERVAL, decimals=4), 'm'],
-             ['Streamwise # of pts', s.size + 2*np.int(LAMBDA/2/DS), '/'],
+             ['Streamwise # of pts', s.size + 2*int(LAMBDA/2/DS), '/'],
              ['Transverse # of pts', NUM*2+1, '/']]
     elif MODE == 2:
         if FNAME[0].islower():
@@ -223,52 +223,52 @@ def print_eqn():
     """
     if sys.stdout.encoding.lower().startswith('utf'):
         if JS != 0 and JF != 0:
-            print('Eqn: \u03B8=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2\u03C0s/' + np.str(np.around(LAMBDA, decimals=6)) +
-                  ')\n      +' + np.str(np.around(THETA0**3, decimals=6)) +
-                  '*[' + np.str(np.around(JS, decimals=6)) + '*cos(6\u03C0s/' +
-                  np.str(np.around(LAMBDA, decimals=6)) +
-                  ')-' + np.str(np.around(JF, decimals=6)) + '*sin(6\u03C0s/' +
-                  np.str(np.around(LAMBDA, decimals=6)) + ')]')
+            print('Eqn: \u03B8=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2\u03C0s/' + str(np.around(LAMBDA, decimals=6)) +
+                  ')\n      +' + str(np.around(THETA0**3, decimals=6)) +
+                  '*[' + str(np.around(JS, decimals=6)) + '*cos(6\u03C0s/' +
+                  str(np.around(LAMBDA, decimals=6)) +
+                  ')-' + str(np.around(JF, decimals=6)) + '*sin(6\u03C0s/' +
+                  str(np.around(LAMBDA, decimals=6)) + ')]')
         elif JS == 0 and JF != 0:
-            print('Eqn: \u03B8=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2\u03C0s/' + np.str(np.around(LAMBDA, decimals=6)) +
-                  ')+' + np.str(np.around(THETA0**3, decimals=6)) + '*[' + 
-                  '-' + np.str(np.around(JF, decimals=6)) + '*sin(6\u03C0s/' +
-                  np.str(np.around(LAMBDA, decimals=6)) + ')]')
+            print('Eqn: \u03B8=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2\u03C0s/' + str(np.around(LAMBDA, decimals=6)) +
+                  ')+' + str(np.around(THETA0**3, decimals=6)) + '*[' + 
+                  '-' + str(np.around(JF, decimals=6)) + '*sin(6\u03C0s/' +
+                  str(np.around(LAMBDA, decimals=6)) + ')]')
         elif JS != 0 and JF == 0:
-            print('Eqn: \u03B8=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2\u03C0s/' + np.str(np.around(LAMBDA, decimals=6)) +
-                  ')+' + np.str(np.around(THETA0**3, decimals=6)) +
-                  '*[' + np.str(np.around(JS, decimals=6)) + '*cos(6\u03C0s/' +
-                  np.str(np.around(LAMBDA, decimals=6)) + ')]')
+            print('Eqn: \u03B8=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2\u03C0s/' + str(np.around(LAMBDA, decimals=6)) +
+                  ')+' + str(np.around(THETA0**3, decimals=6)) +
+                  '*[' + str(np.around(JS, decimals=6)) + '*cos(6\u03C0s/' +
+                  str(np.around(LAMBDA, decimals=6)) + ')]')
         elif JS == 0 and JF == 0:
-            print('Eqn: \u03B8=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2\u03C0s/' + np.str(np.around(LAMBDA, decimals=6)) + ')')
+            print('Eqn: \u03B8=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2\u03C0s/' + str(np.around(LAMBDA, decimals=6)) + ')')
     else:
         if JS != 0 and JF != 0:
-            print('Eqn: THETA=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2PI/' + np.str(np.around(LAMBDA, decimals=6)) +
-                  ')\n          +' + np.str(np.around(THETA0**3, decimals=6)) +
-                  '*[' + np.str(np.around(JS, decimals=6)) + '*cos(6PI/' +
-                  np.str(np.around(LAMBDA, decimals=6)) +
-                  ')-' + np.str(np.around(JF, decimals=6)) + '*sin(6PI/' +
-                  np.str(np.around(LAMBDA, decimals=6)) + ')]')
+            print('Eqn: THETA=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2PI/' + str(np.around(LAMBDA, decimals=6)) +
+                  ')\n          +' + str(np.around(THETA0**3, decimals=6)) +
+                  '*[' + str(np.around(JS, decimals=6)) + '*cos(6PI/' +
+                  str(np.around(LAMBDA, decimals=6)) +
+                  ')-' + str(np.around(JF, decimals=6)) + '*sin(6PI/' +
+                  str(np.around(LAMBDA, decimals=6)) + ')]')
         elif JS == 0 and JF != 0:
-            print('Eqn: THETA=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2PI/' + np.str(np.around(LAMBDA, decimals=6)) +
-                  ')+' + np.str(np.around(THETA0**3, decimals=6)) + '*[' + 
-                  '-' + np.str(np.around(JF, decimals=6)) + '*sin(6PI/' +
-                  np.str(np.around(LAMBDA, decimals=6)) + ')]')
+            print('Eqn: THETA=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2PI/' + str(np.around(LAMBDA, decimals=6)) +
+                  ')+' + str(np.around(THETA0**3, decimals=6)) + '*[' + 
+                  '-' + str(np.around(JF, decimals=6)) + '*sin(6PI/' +
+                  str(np.around(LAMBDA, decimals=6)) + ')]')
         elif JS != 0 and JF == 0:
-            print('Eqn: THETA=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2PI/' + np.str(np.around(LAMBDA, decimals=6)) +
-                  ')+' + np.str(np.around(THETA0**3, decimals=6)) +
-                  '*[' + np.str(np.around(JS, decimals=6)) + '*cos(6PI/' +
-                  np.str(np.around(LAMBDA, decimals=6)) + ')]')
+            print('Eqn: THETA=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2PI/' + str(np.around(LAMBDA, decimals=6)) +
+                  ')+' + str(np.around(THETA0**3, decimals=6)) +
+                  '*[' + str(np.around(JS, decimals=6)) + '*cos(6PI/' +
+                  str(np.around(LAMBDA, decimals=6)) + ')]')
         elif JS == 0 and JF == 0:
-            print('Eqn: THETA=' + np.str(np.around(THETA0, decimals=6)) +
-                  '*sin(2PI/' + np.str(np.around(LAMBDA, decimals=6)) + ')')
+            print('Eqn: THETA=' + str(np.around(THETA0, decimals=6)) +
+                  '*sin(2PI/' + str(np.around(LAMBDA, decimals=6)) + ')')
 
 
 def build_kinoshita():
@@ -300,7 +300,7 @@ def build_kinoshita():
     print('MODE 1: GENERATE KINOSHITA CURVE FROM EQUATION is selected')
     print('Kinoshita Curve parameters are read from steering file:')
     print_eqn()
-    s = np.linspace(0, NBENDS*LAMBDA, np.int(NBENDS*LAMBDA/DS) + 1)
+    s = np.linspace(0, NBENDS*LAMBDA, int(NBENDS*LAMBDA/DS) + 1)
     print_para_table(s)
     print('+> Calculating Kinoshita Curve...', end='')
     s, x, y, cur, theta = compute_kinoshita(s)
@@ -336,7 +336,7 @@ def compute_kinoshita(s):
         angular ampitude
 
     """
-    length = np.int(NBENDS*LAMBDA/DS) + 1
+    length = int(NBENDS*LAMBDA/DS) + 1
     x = np.zeros(length)
     y = np.zeros(length)
     cur = np.zeros(length+1)
@@ -478,7 +478,7 @@ def extend_centerline(s, x, y, cur, theta):
     elif MODE == 2:
         extlength = WIDTH
         d = INTERVAL
-    num = np.int(extlength/d)
+    num = int(extlength/d)
         
     coshead = (x[1] - x[0])/d
     sinhead = (y[1] - y[0])/d
@@ -569,7 +569,7 @@ def smooth_centerline(x, y):
         y coordinate of river centerline after smoothing
     
     """
-    n = SMOLEV if SMOLEV < 39 else np.int(np.around(1.1**SMOLEV,decimals=0))
+    n = SMOLEV if SMOLEV < 39 else int(np.around(1.1**SMOLEV,decimals=0))
     xa, xb, ya, yb = x[0], x[-1], y[0], y[-1]
     for i in range(n):
         x = savgol_filter(x, 5, 2, mode='nearest')
@@ -634,9 +634,9 @@ def lag(s, cur, t):
         return cur
     else:
         if MODE == 1:
-            num = np.int(WIDTH*LAGSTR/DS)
+            num = int(WIDTH*LAGSTR/DS)
         elif MODE == 2:
-            num = np.int(WIDTH*LAGSTR/np.mean(np.diff(s)))
+            num = int(WIDTH*LAGSTR/np.mean(np.diff(s)))
     if np.mod(t, LPRINT) == 0:
         print('+> Adding phase lag to local curvature...', end='')
     cur = compute_lag(cur, num)
@@ -1000,7 +1000,7 @@ def offset_all(x, y, beck_bed, t):
             else:
                 extr = '...'
             print('+> Offsetting Polyline #'
-                  + np.str(i+1) + ' & #' + np.str(2*NUM+1-i) + extr, end='')
+                  + str(i+1) + ' & #' + str(2*NUM+1-i) + extr, end='')
         offsetx, offsety = offset(x, y, WIDTH/2-i*INTERVAL)
         if i == 0 and SAVEBOUND and t == 0:
             t1 = np.copy(offsetx)
@@ -1021,7 +1021,7 @@ def offset_all(x, y, beck_bed, t):
         if np.mod(t, LPRINT) == 0:
             print(' [done]')
         if i == 0 and np.mod(t, LPRINT) == 0:
-            print('   * Note: Polyline #' + np.str(NUM + 1) + ' is centerline')
+            print('   * Note: Polyline #' + str(NUM + 1) + ' is centerline')
     return allxyz
 
 
