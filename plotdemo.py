@@ -137,7 +137,7 @@ def make_figure(x, y, allxyz, cur_ori, cur_flt, cur_lag, s, beck_bed,
                 plt.savefig(FNAME.rsplit('.', 1)[0] + '_pyriverbed.' + ext, dpi=300)
         if not os.path.exists(JPG_DIRS[0]):
             os.makedirs(JPG_DIRS[0])
-        plt.savefig(JPG_DIRS[0] + FNAME.rsplit('.', 1)[0] + '_' + str(t) + '_pyriverbed.jpg', quality=80, dpi=150)
+        plt.savefig(JPG_DIRS[0] + FNAME.rsplit('.', 1)[0] + '_' + str(t) + '_pyriverbed.jpg', dpi=150)
     else:
         extList = ['jpg', 'pdf']
         for ext in extList:
@@ -164,7 +164,7 @@ def make_figure(x, y, allxyz, cur_ori, cur_flt, cur_lag, s, beck_bed,
         plt.tight_layout()
         if not os.path.exists(JPG_DIRS[1]):
             os.makedirs(JPG_DIRS[1])
-        plt.savefig(JPG_DIRS[1] + FNAME.rsplit('.', 1)[0] + '_' + str(t) + '_migration.jpg', quality=80, dpi=150) 
+        plt.savefig(JPG_DIRS[1] + FNAME.rsplit('.', 1)[0] + '_' + str(t) + '_migration.jpg', dpi=150) 
         plt.close()
     print(' [done]')
 
