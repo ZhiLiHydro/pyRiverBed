@@ -41,8 +41,8 @@ This tool could:
 
 ## Prerequisites
 
-* Python >= 3.5 && != 3.9 (March 2021)
-* tkinter (usually comes with Python installation)
+* Python >= 3.5
+* tkinter (in most cases it comes with Python installation)
 * Numpy
 * Scipy
 * Matplotlib
@@ -50,15 +50,24 @@ This tool could:
 * [tabulate](https://pypi.org/project/tabulate/)
 * [imageio](https://imageio.github.io/) (only needed if simulating meander channel migration)
 
-Using [Anaconda](https://www.anaconda.com/distribution/) is recommended. Or, install Numpy, Scipy, Matplotlib, Numba, tabulate and imageio by `pip install <package name>`. Their versions must adapt Python's version.
+Using [Anaconda](https://www.anaconda.com/distribution/) and creatintg a virtual environment are recommended:
 
-In some rare cases, such as in some versions of [Ubuntu in Windows Subsystem for Linux](https://ubuntu.com/wsl), tkinter may not be installed even though Python 3 is installed with the system, then installation of tkinter by `sudo apt install python3-tk` or similar command is required.
+```
+conda creat -n pyriverbed python numpy scipy matplotlib numba tabulate imageio
+conda activate pyriverbed
+```
+
+**Or**, if `pip` is prefered, just install `Numpy`, `Scipy`, `Matplotlib`, `Numba`, `tabulate` and `imageio` by `pip3 install <package name>`. 
+
+In some versions of [Ubuntu in Windows Subsystem for Linux](https://ubuntu.com/wsl), `tkinter` may not be installed with Python3, then installation of tkinter by `sudo apt install python3-tk` in Ubuntu or a similar command in other platforms is required.
 
 The following two are recommended, but not required:
+
 * [PyInstaller](https://pypi.org/project/PyInstaller/) (to freeze python codes and dependencies into a single package, i.e., making executables);
 * [Gifsicle](https://www.lcdf.org/gifsicle/) (a command-line tool to optimize GIFs) and its Python wrapper [pygifsicle](https://pypi.org/project/pygifsicle/). 
 
 Example:
+
 ```
 from pygifsicle import optimize
 optimize("path_to_my_gif.gif")
@@ -80,7 +89,7 @@ GUI method: click `Run pyRiverBed` button in GUI to run pyRiverBed
 
 CLI method: quit the GUI and then type `python3 pyriverbed.py` in command line to run pyRiverBed
 
-Both methods to run pyRiverBed work with zero difference
+Both methods to run pyRiverBed work with zero differences
 
 ## Examples
 
@@ -112,13 +121,11 @@ Synthetic riverbed | River centerline
 :-------------------------:|:-------------------------:
 <img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/jurua_migration0.gif">  |  <img src="https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/jurua_migration1.gif">
 
-## To do
-
-- [x] Performance improvements and code optimizations. 
-
 ## Related publications
 
-Li, Z. and Garcia, M. H. (2021). pyRiverBed: A Python framework to generate synthetic riverbed topography for constant-width meandering rivers. Computers & Geosciences.
+Li, Z., & Garcia, M. H. (2021). pyRiverBed: A Python framework to generate synthetic riverbed topography for constant-width meandering rivers. Computers & Geosciences, 152. doi:[10.1016/j.cageo.2021.104755](https://www.doi.org/10.1016/j.cageo.2021.104755)
+
+Rowley, T., Konsoer, K., Langendoen, E. J., Li, Z., Ursic, M., & Garcia, M. H. (2021). Relationship of point bar morphology to channel curvature and planform evolution. Geomorphology, 375. doi:[10.1016/j.geomorph.2020.107541](https://www.doi.org/10.1016/j.geomorph.2020.107541)
 
 ## License
 
