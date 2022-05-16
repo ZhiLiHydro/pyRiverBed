@@ -50,14 +50,18 @@ This tool could:
 * [tabulate](https://pypi.org/project/tabulate/)
 * [imageio](https://imageio.github.io/) (only needed if simulating meander channel migration)
 
-Using [Anaconda](https://www.anaconda.com/distribution/) and creatintg a virtual environment are recommended:
+Using [Anaconda](https://www.anaconda.com/distribution/) and using `conda` to create a virtual environment are recommended:
 
 ```
-conda creat -n pyriverbed python numpy scipy matplotlib numba tabulate imageio
+conda create -n pyriverbed python numpy scipy matplotlib numba tabulate imageio
 conda activate pyriverbed
 ```
 
-**Or**, if `pip` is prefered, just install `Numpy`, `Scipy`, `Matplotlib`, `Numba`, `tabulate` and `imageio` by `pip3 install <package name>`. 
+**OR**, if `pip` is more preferred, just install `Numpy`, `Scipy`, `Matplotlib`, `Numba`, `tabulate` and `imageio` by:
+
+```
+pip3 install numpy scipy matplotlib numba tabulate imageio
+```
 
 In some versions of [Ubuntu in Windows Subsystem for Linux](https://ubuntu.com/wsl), `tkinter` may not be installed with Python3, then installation of tkinter by `sudo apt install python3-tk` in Ubuntu or a similar command in other platforms is required.
 
