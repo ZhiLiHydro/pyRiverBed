@@ -131,6 +131,8 @@ Li, Z., & Garcia, M. H. (2021). pyRiverBed: A Python framework to generate synth
 
 Rowley, T., Konsoer, K., Langendoen, E. J., Li, Z., Ursic, M., & Garcia, M. H. (2021). Relationship of point bar morphology to channel curvature and planform evolution. Geomorphology, 375. doi:[10.1016/j.geomorph.2020.107541](https://www.doi.org/10.1016/j.geomorph.2020.107541)
 
+Sun, Y., Song, X., Li, Z., Xu, H., & Bai, Y. (2025). Analytical simulation of meander morphology from equilibrium to long-term evolution: Impacts of channel geometry and vegetation-induced coarsening. International Journal of Sediment Research. doi:[10.1016/j.ijsrc.2025.02.003](https://doi.org/10.1016/j.ijsrc.2025.02.003)
+
 ## License
 
 [MIT License](https://github.com/ZhiLiHydro/pyRiverBed/blob/master/LICENSE)
