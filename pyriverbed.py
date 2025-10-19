@@ -1252,6 +1252,7 @@ def migration(s, x, y, cur_flt, cur_lag, theta, t):
 
     """
     if MIGRATION:
+        x0, y0 = np.copy(x), np.copy(y)
         if np.mod(t, LPRINT) == 0 and np.mod(t, GPRINT) != 0:
             print('\n[Time Step '+str(t)+'/'+str(TSTEPS)
                   +']\n+> Running channel migration...', end='')
@@ -1285,11 +1286,11 @@ def migration(s, x, y, cur_flt, cur_lag, theta, t):
             s[j] = np.sqrt((x[j]-x[j-1])**2 + (y[j]-y[j-1])**2) + s[j-1]
         if np.mod(t, LPRINT) == 0:
             print(' [done]')
-    return s, x, y
+    return s, x, y, np.mean(((x-x0)**2+(y-y0)**2)**0.5)
 
 
 @jit(nopython=True)
-def cutoff(s, x, y):
+def neck_cutoff(s, x, y):
     """
     Find neck cutoff. If found, remake centerline.
 
@@ -1338,7 +1339,20 @@ def cutoff(s, x, y):
                     return s, x, y, oxbowx, oxbowy, found_cutoff
     return s, x, y, oxbowx, oxbowy, found_cutoff
 
-    
+def chute_cutoff(s, x, y, i, j):
+    oxbowx, oxbowy = np.zeros(0), np.zeros(0)
+    found_cutoff = False
+    if MIGRATION:
+        oxbowx, oxbowy = np.copy(x[i+1:j]), np.copy(y[i+1:j])
+        x = np.concatenate((x[:i+1], x[j:]), axis=0)
+        y = np.concatenate((y[:i+1], y[j:]), axis=0)
+        found_cutoff = True
+        s = np.zeros(x.size)
+        for j in range(1, x.size):
+            s[j] = s[j-1] + np.sqrt((x[j]-x[j-1])**2 + (y[j]-y[j-1])**2)
+        return s, x, y, oxbowx, oxbowy, found_cutoff
+    return s, x, y, oxbowx, oxbowy, found_cutoff
+
 def make_gif():
     """
     Make channel migration movie in gif format.
@@ -1399,11 +1413,35 @@ def main():
     s, x, y, cur, theta = build_kinoshita()
     s, x, y, cur, theta = read_centerline(s, x, y, cur, theta)
     s, x, y, cur, theta = extend_centerline(s, x, y, cur, theta)
+    sinuosity, mean_migration_rate = np.zeros(TSTEPS), np.zeros(TSTEPS)
     for t in range(TSTEPS+1):
         cur, theta = tan2curv(s, x, y)
         cur_ori = np.copy(cur)
         cur = filter_curvature(cur, t)
         cur_flt = np.copy(cur)
+
+        signs = np.sign(cur_flt)
+        signs_diff = np.diff(signs)
+        try:
+            chute_valey_angle = 0
+            inflection_pts_idx = np.where(signs_diff != 0)[0]
+            apexes_idx = []
+            for i in range(len(inflection_pts_idx) - 1):
+                start, end = inflection_pts_idx[i], inflection_pts_idx[i + 1]
+                apexes_idx.append(start+np.argmax(np.abs(cur_flt)[start:end]))
+            apexes_idx = np.array(apexes_idx)
+            chute_entrance_loc = 'apex' # 'inflection'
+            chute_loc_idx = apexes_idx if chute_entrance_loc == 'apex' else inflection_pts_idx
+            rand_idx = 0
+            for i in range(100):
+                if rand_idx < 3 or rand_idx > len(chute_loc_idx) - 3:
+                    rand_idx = int(np.random.random()*len(chute_loc_idx))
+                else:
+                    break
+            chute_valey_angle = np.degrees(np.atan2(np.abs(y[chute_loc_idx[rand_idx]]-y[chute_loc_idx[rand_idx+2]])/np.abs(x[chute_loc_idx[rand_idx]]-x[chute_loc_idx[rand_idx+2]])))
+        except:
+            pass
+
         cur = lag(s, cur, t)
         cur_lag = np.copy(cur)
         beck_bed = build_beck(cur, s, t)
@@ -1413,6 +1451,7 @@ def main():
             write_mesh_file(allxyz, beck_bed)
             oxbowxList, oxbowyList = [], []
             centerlinexList, centerlineyList = [], []
+            found_chute_cutoff = False
         if np.mod(t, GPRINT) == 0:
             centerlinexList.append(x)
             centerlineyList.append(y)
@@ -1420,13 +1459,22 @@ def main():
                            params, t, oxbowxList, oxbowyList, centerlinexList, centerlineyList)
         if t == TSTEPS:
             break
-        s, x, y = migration(s, x, y, cur_flt, cur_lag, theta, t)
-        s, x, y, oxbowx, oxbowy, found_cutoff = cutoff(s, x, y)
+        s, x, y, mean_migration_rate[t] = migration(s, x, y, cur_flt, cur_lag, theta, t)
+        s, x, y, oxbowx_neck, oxbowy_neck, found_neck_cutoff = neck_cutoff(s, x, y)
+        if t > 2000 and len(chute_loc_idx) > 5 and np.abs(chute_loc_idx[rand_idx]-chute_loc_idx[rand_idx+1]) > 10*NUM and chute_valey_angle < 30 and np.random.random() < 0.1:
+            s, x, y, oxbowx_chute, oxbowy_chute, found_chute_cutoff = chute_cutoff(s, x, y, chute_loc_idx[rand_idx], chute_loc_idx[rand_idx+2])
+            print('LENGTH: ', len(chute_loc_idx), chute_loc_idx[rand_idx], chute_loc_idx[rand_idx+2])
         s, x, y = smooth_centerline(x, y)
         s, x, y, cur, theta = resample_centerline(s, x, y)
-        if found_cutoff:
-            oxbowxList.append(oxbowx)
-            oxbowyList.append(oxbowy)
+        if found_neck_cutoff:
+            oxbowxList.append(oxbowx_neck)
+            oxbowyList.append(oxbowy_neck)
+        if found_chute_cutoff:
+            oxbowxList.append(oxbowx_chute)
+            oxbowyList.append(oxbowy_chute)
+        sinuosity[t] = s[-1]/np.sqrt((x[0]-x[-1])**2 + (y[0]-y[-1])**2)
+    np.savetxt('sinuosity.txt', sinuosity)
+    np.savetxt('mean_migration_rate.txt', mean_migration_rate)
     make_gif()
     job_done()
 
