@@ -3,6 +3,25 @@ Generate Synthetic Riverbed Topography for Meandering Rivers
 
 ![intro](https://github.com/ZhiLiHydro/pyRiverBed/blob/master/img/pyRiverBed_intro.png)
 
+## What's new in v1.1.0
+
+Chute cutoff modeling, introduced in v1.0.1, is now fully user-controlled from the steering file instead of being hard-coded.
+
+Besides the meander neck cutoff submodel, which detects cutoffs geometrically, chute cutoffs are triggered stochastically: at every time step of a meander migration run, a chute cutoff happens at a user-given **frequency**, and, once triggered, the chute channel is picked randomly among all the chute channels that satisfy the user-given geometric criteria. The chute channel replaces the channel reach it bypasses, and the bypassed reach becomes an oxbow lake. The following chute cutoff parameters are now available in the GUI and in the steering file:
+
+| Parameter | Meaning |
+|:---|:---|
+| Chute cutoff | Switch chute cutoff modeling on or off (needs meander migration to be on) |
+| Frequency | Probability of triggering a chute cutoff in one time step, e.g. 0.1 = 10% |
+| Starting step | Number of time steps of spin-up before chute cutoffs are allowed |
+| Entrance at | Whether chute channels start and end at bend apexes or at inflection points |
+| Span | Number of entrance points a chute channel spans, e.g. 2 = one full meander bend |
+| Max angle | Maximum angle, in degrees, between the chute channel and the valley axis; a chute channel well aligned with the down-valley direction takes a larger slope advantage over the flow path along the channel |
+| Min length | Minimum length of the bypassed channel reach, normalized by channel width |
+| Margin at ends | Number of entrance points kept away from the two ends of the centerline |
+
+Steering files written by earlier versions of the GUI are still readable: the chute cutoff parameters simply fall back to their default values, and chute cutoff modeling stays off.
+
 ## Introduction
 
 ### For general public: 

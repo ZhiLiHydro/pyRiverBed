@@ -869,7 +869,229 @@ def main():
         font='System 10',
         anchor='w').pack(side='right')
 
-######## BUTTONS 
+####### CHUTE CUTOFF
+    msg = tk.Message(
+        canvas,
+        text='CHUTE CUTOFF PARAMETERS (ONLY WORK IF MIGRATION IS ON)',
+        bg='light cyan',
+        font='System 11 bold',
+        width=500,
+        relief='raised')
+    msg.pack()
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    if platform.system() == 'Darwin':
+        w = 8
+    else:
+        w = 4
+
+    tk.Label(
+        row,
+        text='Chute cutoff',
+        width=17,
+        font='System 10',
+        anchor='c').pack(side='left')
+    chutevar = tk.IntVar()
+    chute = tk.Radiobutton(
+        row,
+        text='Off',
+        width=w,
+        font='System 10',
+        anchor='sw',
+        variable=chutevar,
+        value=0)
+    chute.select()
+    chute.pack(side='left')
+
+    chute = tk.Radiobutton(
+        row,
+        text='On',
+        width=w,
+        font='System 10',
+        anchor='sw',
+        variable=chutevar,
+        value=1)
+    chute.pack(side='left')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='Frequency (unit: /)',
+        width=15,
+        font='System 10',
+        anchor='w').pack(side='left')
+    chutefreqvar = tk.DoubleVar()
+    chutefreq = ttk.Combobox(
+        row,
+        font='System 10',
+        width=12,
+        textvariable=chutefreqvar)
+    chutefreq['values'] = ('0.01', '0.05', '0.1', '0.2', '0.5', '1')
+    chutefreq.set('0.1')
+    chutefreq.pack(side='left')
+
+    chutestartvar = tk.IntVar()
+    chutestart = ttk.Combobox(
+        row,
+        font='System 10',
+        width=12,
+        textvariable=chutestartvar)
+    chutestart['values'] = ('0', '1000', '2000', '5000')
+    chutestart.set('2000')
+    chutestart.pack(side='right')
+    tk.Label(
+        row,
+        text='        Starting step',
+        width=15,
+        font='System 10',
+        anchor='w').pack(side='right')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='(Probability of triggering a chute cutoff in one time step)',
+        width=55,
+        font='System 10',
+        anchor='w').pack(side='left')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='Entrance at',
+        width=13,
+        font='System 10',
+        anchor='c').pack(side='left')
+    chuteentrvar = tk.IntVar()
+    chuteentr = tk.Radiobutton(
+        row,
+        text='Apex',
+        width=w+2,
+        font='System 10',
+        anchor='sw',
+        variable=chuteentrvar,
+        value=1)
+    chuteentr.select()
+    chuteentr.pack(side='left')
+
+    chuteentr = tk.Radiobutton(
+        row,
+        text='Inflection',
+        width=w+5,
+        font='System 10',
+        anchor='sw',
+        variable=chuteentrvar,
+        value=2)
+    chuteentr.pack(side='left')
+
+    chutespanvar = tk.IntVar()
+    chutespan = ttk.Combobox(
+        row,
+        font='System 10',
+        width=4,
+        textvariable=chutespanvar)
+    chutespan['values'] = ('1', '2', '3', '4')
+    chutespan.set('2')
+    chutespan.pack(side='right')
+    tk.Label(
+        row,
+        text='  Span',
+        width=7,
+        font='System 10',
+        anchor='w').pack(side='right')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='Max angle (unit: deg)',
+        width=20,
+        font='System 10',
+        anchor='w').pack(side='left')
+    chuteanglevar = tk.DoubleVar()
+    chuteangle = ttk.Combobox(
+        row,
+        font='System 10',
+        width=7,
+        textvariable=chuteanglevar)
+    chuteangle['values'] = ('15', '30', '45', '60', '90')
+    chuteangle.set('30')
+    chuteangle.pack(side='left')
+
+    chutelenvar = tk.DoubleVar()
+    chutelen = ttk.Combobox(
+        row,
+        font='System 10',
+        width=7,
+        textvariable=chutelenvar)
+    chutelen['values'] = ('5', '10', '15', '20')
+    chutelen.set('10')
+    chutelen.pack(side='right')
+    tk.Label(
+        row,
+        text='        Min length (unit: /)',
+        width=20,
+        font='System 10',
+        anchor='w').pack(side='right')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='(Angle between chute channel and valley axis; ',
+        width=55,
+        font='System 10',
+        anchor='w').pack(side='left')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text=' length of bypassed reach normalized by channel width)',
+        width=55,
+        font='System 10',
+        anchor='w').pack(side='left')
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='Margin at ends (unit: /)',
+        width=42,
+        font='System 10',
+        anchor='w').pack(side='left')
+    chutemarginvar = tk.IntVar()
+    chutemargin = ttk.Combobox(
+        row,
+        font='System 10',
+        width=18,
+        textvariable=chutemarginvar)
+    chutemargin['values'] = ('1', '2', '3', '5')
+    chutemargin.set('3')
+    chutemargin.pack()
+
+    row = tk.Frame(canvas)
+    row.pack(side='top')
+
+    tk.Label(
+        row,
+        text='(Number of entrance points kept away from centerline ends)',
+        width=55,
+        font='System 10',
+        anchor='w').pack(side='left')
+
+######## BUTTONS
     row = tk.Frame(canvas)
     row.pack(side='top',pady=3)
     
@@ -887,7 +1109,11 @@ def main():
                    c0var.get(), cf0var.get(), fr0var.get(),
                    dtvar.get(), e0var.get(), Lprintvar.get(),
                    tstepsvar.get(), gprintvar.get(), fpsvar.get(),
-                   smoothvar.get(), stvar.get()]
+                   smoothvar.get(), stvar.get(), chutevar.get(),
+                   chutefreqvar.get(), chutestartvar.get(),
+                   chuteentrvar.get(), chutespanvar.get(),
+                   chuteanglevar.get(), chutelenvar.get(),
+                   chutemarginvar.get()]
         with open('steering.txt', 'w') as f:
             entries_str = str(entries)
             f.write(fnamevar.get() + '\n')

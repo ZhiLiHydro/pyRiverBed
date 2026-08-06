@@ -82,8 +82,9 @@ def read_steering():
     global MODE, NBENDS, LAMBDA, THETA0, JS, JF, WIDTH, DEPTH, SLOPE, DS, \
     NUM, INTERVAL, LAG, LAGSTR, SAVEXYZ, SAVEBOUND, SAVEMESH, FLIPSTRM, \
     FLIPTRANS, MIGRATION, UB0, C0, CF0, FR0, DT, E0, LPRINT, TSTEPS, \
-    GPRINT, FPS, ZERO, JPG_DIRS, FNAME, SMOLEV, STCORR
-    
+    GPRINT, FPS, ZERO, JPG_DIRS, FNAME, SMOLEV, STCORR, CHUTE, CHUTEFREQ, \
+    CHUTESTART, CHUTEENTR, CHUTESPAN, CHUTEANGLE, CHUTELEN, CHUTEMARGIN
+
     MODE = int(d[0])
     NBENDS = int(d[1])
     LAMBDA = float(d[2])
@@ -118,6 +119,16 @@ def read_steering():
     FPS = int(d[28])
     SMOLEV = int(d[29])
     STCORR = d[30]
+    CHUTE = int(d[31]) if d.size > 31 else 0
+    CHUTEFREQ = float(d[32]) if d.size > 32 else 0.1
+    CHUTESTART = int(d[33]) if d.size > 33 else 2000
+    CHUTEENTR = int(d[34]) if d.size > 34 else 1
+    CHUTESPAN = int(d[35]) if d.size > 35 else 2
+    CHUTEANGLE = float(d[36]) if d.size > 36 else 30
+    CHUTELEN = float(d[37]) if d.size > 37 else 10
+    CHUTEMARGIN = int(d[38]) if d.size > 38 else 3
+    if MIGRATION == 0:
+        CHUTE = 0
     ZERO = 1e-8
     JPG_DIRS = ['./jpg1/', './jpg2/']
 
@@ -204,8 +215,41 @@ def print_resamp_table(mean1, median1, mode1, mean2, median2, mode2):
          ['Median', str(median1) + ' --> ' + str(median2), 'm'],
          ['Mode', str(mode1) + ' --> ' + str(mode2), 'm']]
     print(tabulate(t, tablefmt='psql', stralign='center', headers='firstrow'))
-    
-    
+
+
+def print_chute_table():
+    """
+    Print a table displaying the chute cutoff parameters read from the
+    steering file.
+
+    Only print if chute cutoff modeling is switched on.
+
+    Require 'tabulate' library.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    """
+    if CHUTE == 0:
+        return
+    t = [['Chute cutoff parameter', 'Value', 'Unit'],
+         ['Frequency', str(np.around(CHUTEFREQ*100, decimals=4)) + '%',
+          'per time step'],
+         ['Starting time step', CHUTESTART, '/'],
+         ['Entrance location', 'apex' if CHUTEENTR == 1 else 'inflection',
+          '/'],
+         ['Span', CHUTESPAN, '# of entrances'],
+         ['Max angle with valley axis', CHUTEANGLE, 'deg'],
+         ['Min length of bypassed reach', CHUTELEN, 'channel widths'],
+         ['Margin at centerline ends', CHUTEMARGIN, '# of entrances']]
+    print(tabulate(t, tablefmt='psql', stralign='right', headers='firstrow'))
+
+
 def print_eqn():
     """
     Print Kinoshita Curve equation.
@@ -1339,19 +1383,161 @@ def neck_cutoff(s, x, y):
                     return s, x, y, oxbowx, oxbowy, found_cutoff
     return s, x, y, oxbowx, oxbowy, found_cutoff
 
+
+def find_chute_entrances(cur_flt):
+    """
+    Locate the candidate entrance/exit points of chute channels.
+
+    Inflection points are the points where the curvature signal changes sign.
+    Bend apexes are the points of locally maximum absolute curvature in
+    between two consecutive inflection points. Either family of points can be
+    used as the entrance/exit points of chute channels, as selected by the
+    'chute entrance location' parameter in the steering file.
+
+    Parameters
+    ----------
+    cur_flt : ndarray
+        filtered curvature
+
+    Returns
+    -------
+    chute_loc_idx : ndarray
+        indices of the candidate entrance/exit points of chute channels
+
+    """
+    inflection_pts_idx = np.where(np.diff(np.sign(cur_flt)) != 0)[0]
+    apexes_idx = np.zeros(np.maximum(inflection_pts_idx.size-1, 0), dtype=int)
+    for i in range(inflection_pts_idx.size - 1):
+        start, end = inflection_pts_idx[i], inflection_pts_idx[i+1]
+        apexes_idx[i] = start + np.argmax(np.abs(cur_flt)[start:end])
+    return apexes_idx if CHUTEENTR == 1 else inflection_pts_idx
+
+
+def compute_chute_angle(x, y, i, j):
+    """
+    Compute the angle between a chute channel and the valley axis.
+
+    The chute channel is approximated by the straight chord connecting its
+    entrance (node i) and its exit (node j), and the valley axis is
+    approximated by the straight chord connecting the two ends of the
+    centerline. A small angle means that the chute channel is well aligned
+    with the down-valley direction and therefore takes a large slope
+    advantage over the flow path along the channel, which is one of the
+    conditions favouring the development of a chute cutoff.
+
+    Parameters
+    ----------
+    x : ndarray
+        x coordinate of river centerline
+    y : ndarray
+        y coordinate of river centerline
+    i : integer
+        index of the entrance of the chute channel
+    j : integer
+        index of the exit of the chute channel
+
+    Returns
+    -------
+    angle : float
+        angle between the chute channel and the valley axis, in degrees,
+        ranging from 0 (aligned) to 90 (perpendicular)
+
+    """
+    cx, cy = x[j]-x[i], y[j]-y[i]
+    vx, vy = x[-1]-x[0], y[-1]-y[0]
+    return np.degrees(np.arctan2(np.abs(cx*vy-cy*vx), np.abs(cx*vx+cy*vy)))
+
+
+def find_chute_cutoff(x, y, cur_flt, t):
+    """
+    Find chute cutoff. If found, report the chute channel to be carved.
+
+    A chute cutoff is triggered randomly, at a frequency of CHUTEFREQ per
+    time step, and only after a spin-up period of CHUTESTART time steps.
+    Once triggered, a chute channel spanning CHUTESPAN entrance/exit points
+    is admissible if the channel reach it bypasses is at least CHUTELEN
+    channel widths long, if its angle with the valley axis is not larger
+    than CHUTEANGLE degrees, and if both of its ends keep a distance of
+    CHUTEMARGIN entrance/exit points from the two ends of the centerline.
+    One of all the admissible chute channels is then picked randomly.
+
+    Parameters
+    ----------
+    x : ndarray
+        x coordinate of river centerline
+    y : ndarray
+        y coordinate of river centerline
+    cur_flt : ndarray
+        filtered curvature
+    t : integer
+        current # of time step
+
+    Returns
+    -------
+    i : integer
+        index of the entrance of the chute channel, -1 if not found
+    j : integer
+        index of the exit of the chute channel, -1 if not found
+
+    """
+    if CHUTE == 0 or t < CHUTESTART or np.random.random() >= CHUTEFREQ:
+        return -1, -1
+    chute_loc_idx = find_chute_entrances(cur_flt)
+    minlength = CHUTELEN*2*NUM
+    entrances, exits = [], []
+    for k in range(CHUTEMARGIN, chute_loc_idx.size-CHUTESPAN-CHUTEMARGIN):
+        i, j = chute_loc_idx[k], chute_loc_idx[k+CHUTESPAN]
+        if j-i > minlength and compute_chute_angle(x, y, i, j) <= CHUTEANGLE:
+            entrances.append(i)
+            exits.append(j)
+    if len(entrances) == 0:
+        return -1, -1
+    k = int(np.random.random()*len(entrances))
+    return entrances[k], exits[k]
+
+
 def chute_cutoff(s, x, y, i, j):
-    oxbowx, oxbowy = np.zeros(0), np.zeros(0)
-    found_cutoff = False
-    if MIGRATION:
-        oxbowx, oxbowy = np.copy(x[i+1:j]), np.copy(y[i+1:j])
-        x = np.concatenate((x[:i+1], x[j:]), axis=0)
-        y = np.concatenate((y[:i+1], y[j:]), axis=0)
-        found_cutoff = True
-        s = np.zeros(x.size)
-        for j in range(1, x.size):
-            s[j] = s[j-1] + np.sqrt((x[j]-x[j-1])**2 + (y[j]-y[j-1])**2)
-        return s, x, y, oxbowx, oxbowy, found_cutoff
-    return s, x, y, oxbowx, oxbowy, found_cutoff
+    """
+    Carve the chute channel found by 'find_chute_cutoff', i.e. replace the
+    channel reach in between node i and node j by a straight chute channel,
+    then remake centerline.
+
+    Parameters
+    ----------
+    s : ndarray
+        streamwise distance
+    x : ndarray
+        x coordinate of river centerline
+    y : ndarray
+        y coordinate of river centerline
+    i : integer
+        index of the entrance of the chute channel
+    j : integer
+        index of the exit of the chute channel
+
+    Returns
+    -------
+    s : ndarray
+        streamwise distance after cutoff
+    x : ndarray
+        x coordinate of river centerline after cutoff
+    y : ndarray
+        y coordinate of river centerline after cutoff
+    oxbowx : ndarray
+        x coordinate of oxbow lake after cutoff
+    oxbowy : ndarray
+        y coordinate of oxbow lake after cutoff
+    found_cutoff : boolean
+
+    """
+    oxbowx, oxbowy = np.copy(x[i+1:j]), np.copy(y[i+1:j])
+    x = np.concatenate((x[:i+1], x[j:]), axis=0)
+    y = np.concatenate((y[:i+1], y[j:]), axis=0)
+    s = np.zeros(x.size)
+    for k in range(1, x.size):
+        s[k] = s[k-1] + np.sqrt((x[k]-x[k-1])**2 + (y[k]-y[k-1])**2)
+    return s, x, y, oxbowx, oxbowy, True
+
 
 def make_gif():
     """
@@ -1413,35 +1599,13 @@ def main():
     s, x, y, cur, theta = build_kinoshita()
     s, x, y, cur, theta = read_centerline(s, x, y, cur, theta)
     s, x, y, cur, theta = extend_centerline(s, x, y, cur, theta)
+    print_chute_table()
     sinuosity, mean_migration_rate = np.zeros(TSTEPS), np.zeros(TSTEPS)
     for t in range(TSTEPS+1):
         cur, theta = tan2curv(s, x, y)
         cur_ori = np.copy(cur)
         cur = filter_curvature(cur, t)
         cur_flt = np.copy(cur)
-
-        signs = np.sign(cur_flt)
-        signs_diff = np.diff(signs)
-        try:
-            chute_valey_angle = 0
-            inflection_pts_idx = np.where(signs_diff != 0)[0]
-            apexes_idx = []
-            for i in range(len(inflection_pts_idx) - 1):
-                start, end = inflection_pts_idx[i], inflection_pts_idx[i + 1]
-                apexes_idx.append(start+np.argmax(np.abs(cur_flt)[start:end]))
-            apexes_idx = np.array(apexes_idx)
-            chute_entrance_loc = 'apex' # 'inflection'
-            chute_loc_idx = apexes_idx if chute_entrance_loc == 'apex' else inflection_pts_idx
-            rand_idx = 0
-            for i in range(100):
-                if rand_idx < 3 or rand_idx > len(chute_loc_idx) - 3:
-                    rand_idx = int(np.random.random()*len(chute_loc_idx))
-                else:
-                    break
-            chute_valey_angle = np.degrees(np.atan2(np.abs(y[chute_loc_idx[rand_idx]]-y[chute_loc_idx[rand_idx+2]])/np.abs(x[chute_loc_idx[rand_idx]]-x[chute_loc_idx[rand_idx+2]])))
-        except:
-            pass
-
         cur = lag(s, cur, t)
         cur_lag = np.copy(cur)
         beck_bed = build_beck(cur, s, t)
@@ -1451,7 +1615,6 @@ def main():
             write_mesh_file(allxyz, beck_bed)
             oxbowxList, oxbowyList = [], []
             centerlinexList, centerlineyList = [], []
-            found_chute_cutoff = False
         if np.mod(t, GPRINT) == 0:
             centerlinexList.append(x)
             centerlineyList.append(y)
@@ -1461,9 +1624,15 @@ def main():
             break
         s, x, y, mean_migration_rate[t] = migration(s, x, y, cur_flt, cur_lag, theta, t)
         s, x, y, oxbowx_neck, oxbowy_neck, found_neck_cutoff = neck_cutoff(s, x, y)
-        if t > 2000 and len(chute_loc_idx) > 5 and np.abs(chute_loc_idx[rand_idx]-chute_loc_idx[rand_idx+1]) > 10*NUM and chute_valey_angle < 30 and np.random.random() < 0.1:
-            s, x, y, oxbowx_chute, oxbowy_chute, found_chute_cutoff = chute_cutoff(s, x, y, chute_loc_idx[rand_idx], chute_loc_idx[rand_idx+2])
-            print('LENGTH: ', len(chute_loc_idx), chute_loc_idx[rand_idx], chute_loc_idx[rand_idx+2])
+        found_chute_cutoff = False
+        if not found_neck_cutoff:
+            i_chute, j_chute = find_chute_cutoff(x, y, cur_flt, t)
+            if i_chute >= 0:
+                s, x, y, oxbowx_chute, oxbowy_chute, found_chute_cutoff \
+                    = chute_cutoff(s, x, y, i_chute, j_chute)
+                print('\n+> Chute cutoff found at time step ' + str(t)
+                      + ': node ' + str(i_chute) + ' to node ' + str(j_chute)
+                      + ' is bypassed')
         s, x, y = smooth_centerline(x, y)
         s, x, y, cur, theta = resample_centerline(s, x, y)
         if found_neck_cutoff:
