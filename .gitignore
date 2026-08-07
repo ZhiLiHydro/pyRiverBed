@@ -7,6 +7,13 @@
 *.i2s
 *.cli
 *.bc2
+frames_bed/
+frames_planform/
+pyriverbed.log
+/pyriverbed.ini
+*_sinuosity.txt
+*_mean_migration_rate.txt
+out/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

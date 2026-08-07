@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyriverbed"
+dynamic = ["version"]
+description = "Generate synthetic riverbed topography for meandering rivers"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Zhi Li", email = "zhil2@illinois.edu" }]
+maintainers = [{ name = "Zhi Li", email = "zhil2@illinois.edu" }]
+keywords = [
+    "river",
+    "meandering",
+    "geomorphology",
+    "bathymetry",
+    "riverbed",
+    "topography",
+    "morphodynamics",
+    "telemac",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+
+# Deliberately short. v1.x also needed numba and tabulate; the numerics are now
+# vectorised NumPy, and the tables are formatted in-house.
+dependencies = [
+    "numpy>=1.20",
+    "scipy>=1.7",
+    "matplotlib>=3.3",
+]
+
+[project.optional-dependencies]
+gif = ["imageio>=2.9"]
+notebook = ["jupyter", "ipywidgets>=7.6"]
+all = ["imageio>=2.9", "jupyter", "ipywidgets>=7.6"]
+
+[project.urls]
+Homepage = "https://github.com/ZhiLiHydro/pyRiverBed"
+Repository = "https://github.com/ZhiLiHydro/pyRiverBed"
+Issues = "https://github.com/ZhiLiHydro/pyRiverBed/issues"
+Publication = "https://doi.org/10.1016/j.cageo.2021.104755"
+
+[project.scripts]
+pyriverbed = "pyriverbed.cli:main"
+
+[tool.setuptools]
+packages = ["pyriverbed"]
+
+[tool.setuptools.dynamic]
+version = { attr = "pyriverbed._version.__version__" }
